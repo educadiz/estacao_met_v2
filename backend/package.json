@@ -4,11 +4,12 @@
   "main": "index.js",
   "type": "module",
   "dependencies": {
-    "json-server": "^0.17.4",
-    "express": "^4.18.2",
-    "mqtt": "^5.0.0",
-    "firebase-admin": "^12.0.0",
+    "cors": "^2.8.5",
     "dotenv": "^16.0.0",
-    "cors": "^2.8.5"
+    "express": "^4.21.2",
+    "firebase-admin": "^12.0.0",
+    "json-server": "^0.17.4",
+    "mqtt": "^5.0.0",
+    "xpress": "^2.4.6"
   }
 }

@@ -5,7 +5,7 @@
 
 import express from "express";
 import cors from "cors";
-import "./mqttHandler.js"; // Inicializa o listener MQTT automaticamente
+import "./mqttHandler.js"; 
 import { db } from "./firebaseConfig.js";
 
 // Configuração do Express

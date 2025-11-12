@@ -1,146 +1,174 @@
 # Estação Meteorológica Cangaceiros 🌤️
 
-Sistema de monitoramento em tempo real de condições climáticas, incluindo temperatura, umidade, insolação e detecção de chuva.
+Sistema de monitoramento em tempo real de condições climáticas (temperatura, umidade, insolação, detecção de chuva e alertas). Frontend estático servido via Firebase Hosting; backend por Cloud Functions que consome mensagens MQTT e grava no Firebase Realtime Database. API REST pública interna para consumo dos dados.
 
-## Estrutura do Projeto
+Sumário
+- Visão geral
+- Estrutura do projeto
+- Requisitos e dependências
+- Configuração e variáveis de ambiente
+- Inicialização local (desenvolvimento)
+- Arquitetura e fluxo de dados
+- Tópicos MQTT
+- Endpoints REST (exemplos)
+- Deploy
+- Boas práticas de segurança
+- Troubleshooting rápido
 
-O projeto está dividido em três partes principais:
+Visão geral
+O sistema recebe leituras de sensores através de um broker MQTT (ex.: broker.hivemq.com), processa-as em Cloud Functions (subscrevendo tópicos MQTT), grava leituras e alertas no Realtime Database e expõe endpoints REST para o frontend e consumidores externos. O frontend é uma SPA simples (HTML/CSS/JS) com cards e gráficos.
 
-### Frontend (pasta /public)
-- HTML5, CSS3 e JavaScript puro
-- Interface responsiva com cards de monitoramento
-- Gráficos via ThingSpeak
-- Atualização em tempo real dos dados
+Estrutura do projeto
+- /public — frontend (HTML, CSS, JS)
+- /functions — backend (Cloud Functions Node.js)
+- /firebase.json, .firebaserc — configuração de hosting e functions
+- README.md — documentação
 
-### Backend (pasta /functions)
-- Cloud Functions do Firebase
-- MQTT para recebimento de dados dos sensores
-- Firebase Realtime Database para armazenamento
-- API REST para acesso aos dados
+Requisitos e dependências
+- Sistema: Ubuntu 24.04 (container dev)
+- Node.js 18+ (recomendado 18.x ou 20.x compatível com Firebase Functions)
+- npm ou pnpm
+- Firebase CLI: `npm install -g firebase-tools`
+- Conta Firebase com: Hosting, Cloud Functions e Realtime Database habilitados
+- Broker MQTT (ex.: HiveMQ) acessível a partir das Cloud Functions ou de um cliente local
+- Arquivo de credenciais da conta de serviço (serviceAccountKey.json) — não versionar
 
-### Firebase Hosting
-- Hospedagem do frontend
-- Integração com Cloud Functions para o backend
-- Roteamento automático de requisições API
+Dependências típicas (no folder functions)
+- firebase-admin
+- firebase-functions
+- mqtt (ou outra lib MQTT)
+- express (para roteamento REST se usado)
+Instale em functions:
+```bash
+cd functions
+npm install firebase-admin firebase-functions mqtt express
+```
 
-## Requisitos
+Configuração e variáveis de ambiente
+- serviceAccountKey.json: colocar em /workspaces/estacao_met_v2/functions (NÃO comitar).
+- Variáveis Firebase Functions (exemplo):
+```bash
+firebase functions:config:set mqtt.broker="broker.hivemq.com" mqtt.port=1883 mqtt.topicPrefix="est_01"
+```
+- Para chaves sensíveis preferir `firebase functions:config:set` e não armazenar em VCS.
+- Se usar outros serviços (API keys, ThingSpeak), configure via functions:config.
 
-- Node.js 18+ instalado
-- Firebase CLI instalado (`npm install -g firebase-tools`)
-- Conta no Firebase com os seguintes serviços habilitados:
-  - Hosting
-  - Cloud Functions
-  - Realtime Database
-- Arquivo de credenciais do Firebase (`serviceAccountKey.json`)
-- Conexão com broker MQTT (HiveMQ)
-
-## Configuração
-
+Inicialização local (desenvolvimento)
 1. Clone o repositório:
 ```bash
-git clone [URL_DO_REPOSITORIO]
+git clone <URL_DO_REPOSITORIO>
+cd estacao_met_v2
 ```
-
-2. Configure o Firebase:
+2. Instale dependências:
 ```bash
-# Faça login no Firebase
-firebase login
-
-# Inicialize o projeto (se ainda não estiver configurado)
-firebase init
-
-# Selecione Hosting e Functions quando perguntado
-```
-
-3. Configure o backend:
-```bash
+# Raiz (se houver)
+npm install
+# Backend
 cd functions
 npm install
-# Adicione o arquivo serviceAccountKey.json na pasta functions
 ```
-
-4. Configure as variáveis de ambiente (se necessário):
+3. Emular/rodar Functions localmente:
+- Usando Firebase Emulator Suite:
 ```bash
-cd functions
-firebase functions:config:set mqtt.broker="broker.hivemq.com"
+# No workspace raiz
+firebase emulators:start --only functions,hosting
 ```
-
-## Deploy
-
-Para fazer o deploy completo da aplicação:
-
-```bash
-# Deploy de tudo (hosting e functions)
-firebase deploy
-
-# Deploy apenas do frontend
-firebase deploy --only hosting
-
-# Deploy apenas do backend
-firebase deploy --only functions
-```
-
-## Desenvolvimento Local
-
-1. Para testar as Cloud Functions localmente:
+- Ou, se houver script:
 ```bash
 cd functions
 npm run serve
 ```
-
-2. Para testar o frontend localmente:
+4. Testar frontend localmente:
 ```bash
 firebase serve --only hosting
+# ou use emulators:start conforme acima
 ```
-
-## Estrutura de Tópicos MQTT
-
-- `est_01/temp` - Temperatura (°C)
-- `est_01/umid` - Umidade (%)
-- `est_01/chuva` - Detecção de Chuva
-- `est_01/solar` - Nível de Insolação (%)
-- `est_01/alerta` - Alertas do Sistema
-
-## API REST
-
-Endpoints disponíveis:
-
-- `GET /api/temp` - Última leitura de temperatura
-- `GET /api/umid` - Última leitura de umidade
-- `GET /api/solar` - Última leitura de insolação
-- `GET /api/chuva` - Estado do sensor de chuva
-- `GET /api/alerta` - Últimos alertas do sistema
-
-## Arquitetura do Sistema
-
-```
-Sensores → Broker MQTT → Cloud Functions → Firebase Database
-                                        ↑
-                      Frontend (Hosting) → API REST
-```
-
-## Monitoramento e Logs
-
-Para visualizar os logs das Cloud Functions:
+5. Para abrir uma URL do host a partir do container dev use:
 ```bash
-firebase functions:log
+"$BROWSER" http://localhost:5000
 ```
 
-Para monitorar o uso:
-- Acesse o Console do Firebase
-- Vá para a seção de Cloud Functions
-- Verifique métricas de uso e desempenho
+Arquitetura e fluxo de dados
+Sensores → Broker MQTT → (Cloud Functions / serviço MQTT) → Realtime Database ← Frontend / API REST  
+- As Functions consomem mensagens MQTT, validam payloads, gravam leituras em paths do Realtime Database e geram alertas conforme regras.
+- O frontend consulta a API REST (Cloud Functions HTTP) ou lê diretamente o Realtime Database para atualizar a UI em tempo real.
 
-## Segurança
+Tópicos MQTT usados
+- est_01/temp — Temperatura (°C) — payload numérico ou JSON { "value": 22.5, "ts": 167... }
+- est_01/umid — Umidade (%) 
+- est_01/solar — Insolação (%) 
+- est_01/chuva — Sensor de chuva (0/1 ou boolean)
+- est_01/alerta — Alertas do sistema (strings/JSON)
+Observação: ajustar prefixo de tópico via variáveis mqtt.topicPrefix.
 
-- As credenciais do Firebase devem ser mantidas seguras
-- O arquivo `serviceAccountKey.json` não deve ser versionado
-- Considere adicionar autenticação à API REST em produção
-- Configure regras de segurança no Realtime Database
+Formato de dados (recomendado)
+- Mensagens simples:
+  - temperatura: "22.5"
+  - chuva: "1"
+- Mensagens JSON (mais robusto):
+  { "sensor": "temp", "value": 22.5, "unit": "C", "ts": 1699999999000 }
 
-## Suporte
+Paths no Realtime Database (exemplo)
+- /readings/est_01/temperature/latest
+- /readings/est_01/humidity/latest
+- /readings/est_01/solar/latest
+- /readings/est_01/rain/latest
+- /alerts/est_01/ (lista de alertas)
 
-Para questões e suporte:
-1. Verifique os logs no Firebase Console
-2. Consulte a documentação do Firebase
-3. Abra uma issue no repositório do projeto
+Endpoints REST (exemplos)
+- GET /api/temp → último valor de temperatura
+- GET /api/umid → último valor de umidade
+- GET /api/solar → último valor de insolação
+- GET /api/chuva → estado atual do sensor de chuva
+- GET /api/alerta → últimos N alertas
+Exemplo com curl:
+```bash
+curl https://<SEU_HOSTING>.web.app/api/temp
+```
+(As rotas são implementadas em functions/ como HTTP functions ou via Express)
+
+Deploy
+1. Login e inicialização Firebase:
+```bash
+firebase login
+firebase init   # selecione Hosting e Functions
+```
+2. Adicione `serviceAccountKey.json` em functions (localmente).
+3. Realize deploy:
+```bash
+# Deploy de hosting e functions
+firebase deploy
+
+# Deploy apenas hosting
+firebase deploy --only hosting
+
+# Deploy apenas functions
+firebase deploy --only functions
+```
+
+Boas práticas de segurança
+- Nunca versionar serviceAccountKey.json.
+- Use `firebase functions:config:set` para segredos.
+- Configure regras do Realtime Database para restringir leituras/escritas.
+- Considere autenticação (Firebase Auth) para rotas que precisem de proteção.
+- Habilite logging e monitoramento no Firebase Console.
+
+Dicas de desenvolvimento
+- Valide payloads MQTT antes de gravar (tipos, ranges).
+- Normalize timestamps (use UTC / UNIX epoch ms).
+- Crie regras de retenção e agregação se a base de dados receber muitas leituras.
+- Para testes locais de MQTT, use clientes como mosquitto_pub, mqtt-explorer ou pequenas scripts Node.js.
+
+Troubleshooting rápido
+- Erro de permissão ao gravar DB: verifique serviceAccountKey.json e configurações do Firebase Admin.
+- Functions não conectam ao broker MQTT: verifique regras de rede, porta e se o broker permite conexões do ambiente de execução.
+- Logs: `firebase functions:log` ou via Console do Firebase.
+
+Suporte
+- Verifique logs no Firebase Console → Cloud Functions
+- Consulte a documentação oficial do Firebase
+- Abra uma issue no repositório com detalhes e logs relevantes
+
+Licença e Contribuição
+- Adicione informações de licença conforme política do seu projeto (ex.: MIT)
+- Inclua guia de contribuição (CONTRIBUTING.md) se for um projeto colaborativo

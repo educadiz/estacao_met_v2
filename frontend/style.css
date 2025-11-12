@@ -1,6 +1,6 @@
 /* Container visual para os três cards gráficos */
 .container-graficos {
-  background: #f5faff;
+  background: #f0eded;
   border-radius: 16px;
   box-shadow: 0 4px 16px rgba(26,115,232,0.08);
   padding: 2rem 1rem;
@@ -10,7 +10,7 @@
   flex-direction: column;
   align-items: stretch;
 }
-/* Grid para os cards de gráficos (temperatura, umidade, insolação) lado a lado */
+/* Grid para os cards de gráficos (temperatura, umidade, insolacao) lado a lado */
 .graficos-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -657,6 +657,105 @@ footer {
   }
 }
 
+/* Responsividade para tablets */
+@media (max-width: 900px) {
+  .graficos-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    width: 100%;
+    margin-bottom: 1.5rem;
+  }
+  .card.temp-card,
+  .card.umid-card,
+  .card.solar-card {
+    max-width: 100vw;
+    min-width: 0;
+    margin: 0 auto;
+    font-size: 1rem;
+    padding: 1rem 0.5rem;
+  }
+  .container-graficos {
+    padding: 1rem 0.25rem;
+  }
+  .inline-iframes,
+  .iframe-wrap {
+    flex-direction: column;
+    height: auto;
+    min-height: 0;
+    padding: 0.25rem 0;
+  }
+  .iframe-wrap iframe {
+    width: 100% !important;
+    height: 180px !important;
+    min-width: 0;
+    max-width: 100vw;
+  }
+}
+
+/* Responsividade para celulares */
+@media (max-width: 600px) {
+  .container {
+    padding: 0.25rem;
+    gap: 0.5rem;
+  }
+  .card {
+    padding: 0.5rem;
+    font-size: 0.95rem;
+    max-width: 100vw;
+    min-width: 0;
+  }
+  .graficos-grid {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+  }
+  .card.temp-card,
+  .card.umid-card,
+  .card.solar-card {
+    font-size: 1.05rem;
+    padding: 0.75rem 0.25rem;
+    min-width: 0;
+    max-width: 100vw;
+  }
+  .atualizacao {
+    font-size: 0.8rem;
+    margin-top: 0;
+    margin-bottom: 0.25rem;
+  }
+  .mqtt-value {
+    font-size: 1.5rem;
+  }
+  .iframe-wrap iframe {
+    width: 100% !important;
+    height: 120px !important;
+    min-width: 0;
+    max-width: 100vw;
+  }
+  .inline-iframes {
+    flex-direction: column;
+    gap: 0.25rem;
+    height: auto;
+    min-height: 0;
+  }
+  .alertas-grid {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+    max-width: 100vw;
+  }
+  .alert-card {
+    font-size: 0.95rem;
+    padding: 0.75rem 0.25rem;
+    min-width: 0;
+    max-width: 100vw;
+  }
+  h1 {
+    font-size: 1.1rem;
+  }
+  .lead {
+    font-size: 0.85rem;
+  }
+}
+
 /* Print styles for better readability when printed */
 @media print {
   .card {
@@ -669,4 +768,23 @@ footer {
     border: 1px solid #ddd;
     box-shadow: none;
   }
+}
+
+.global-timestamp {
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  font-style: italic;
+  margin-top: 0.25rem;
+  margin-bottom: 0.25rem;
+  text-align: right;
+  opacity: 0.8;
+}
+
+.temp-alert-on {
+  color: #d62020 !important;
+  font-weight: bold;
+}
+.temp-alert-off {
+  color: #1ab620 !important;
+  font-weight: bold;
 }
