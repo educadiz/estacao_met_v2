@@ -1,0 +1,19 @@
+# ...existing code...
+# ignore environment and keys
+backend/.env
+backend/serviceAccountKey.json
+functions/serviceAccountKey.json
+.env
+
+# node / logs
+node_modules/
+backend/node_modules/
+functions/node_modules/
+*.log
+
+# OS / editor
+.DS_Store
+.vscode/
+
+# Arduino binary / compiled sketches
+*.ino.* 

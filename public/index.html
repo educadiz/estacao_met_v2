@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Dashboard da Estação Meteorológica Cangaceiros - Monitoramento em tempo real de temperatura, umidade e insolação" />
+  <title>Dashboard - Estação Meteorológica Cangaceiros</title>
+  <link rel="stylesheet" href="style.css" />
+  <script type="module" src="script.js" defer></script>
+</head>
+<body>
+  <div class="container">
+    <!-- Div 1: Cabeçalho e descrição -->
+    <div id="div1-header">
+      <header>
+        <h1>🌤️ Estação Meteorológica Cangaceiros</h1>
+        <p class="lead">
+          <strong>Monitoramento em tempo real de temperatura, umidade e insolação. Alertas de chuva e temperatura elevada.</strong>
+        </p>
+      </header>
+    </div>
+
+    <!-- Div 2: Container único para os cards gráficos -->
+    <div id="container-graficos" class="card container-graficos">
+      <div class="graficos-grid">
+        <div id="div2-temperatura">
+          <article class="card temp-card" id="temp">
+            <h2>
+              <span class="icon">🌡️</span>
+              Temperatura:
+              <span id="temp-mqtt" class="mqtt-value">°C</span>
+            </h2>
+            
+            <div>
+              <div>
+                <iframe width="100%" height="260" style="border: none" src="https://thingspeak.com/channels/3140279/widgets/1162456"></iframe>
+              </div>
+              <div>
+                <iframe width="100%" height="260" style="border: none" src="https://thingspeak.com/channels/3140279/charts/1?bgcolor=%23ffffff&color=%23d62020&dynamic=true&results=10&title=Temperatura+x+Tempo&type=line&xaxis=Hora+H&yaxis=Temperatrura+oC"></iframe>
+              </div>
+            </div>
+          </article>
+        </div>
+        <div id="div3-umidade">
+          <article class="card umid-card" id="umid">
+            <h2>
+              <span class="icon">💧</span>
+              Umidade:
+              <span id="umid-mqtt" class="mqtt-value">%</span>
+            </h2>
+            <div>
+              <div>
+                <iframe width="100%" height="260" style="border: none" src="https://thingspeak.com/channels/3140279/widgets/1162461"></iframe>
+              </div>
+              <div>
+                <iframe width="100%" height="260" style="border:none" src="https://thingspeak.com/channels/3140279/charts/2?bgcolor=%23ffffff&color=%23d62020&dynamic=true&results=10&title=Umidade+x+Tempo&type=line&xaxis=Tempo+H&yaxis=Umidade+%25"></iframe>
+              </div>
+            </div>
+          </article>
+        </div>
+        <div id="div4-insolacao">
+          <article class="card solar-card" id="solar">
+            <h2>
+              <span class="icon">☀️</span>
+              Insolação:
+              <span id="solar-mqtt" class="mqtt-value">%</span>
+            </h2>
+            <div>
+              <div>
+                <iframe width="100%" height="260" style="border: none" src="https://thingspeak.com/channels/3140279/widgets/1162462"></iframe>
+              </div>
+              <div>
+                <iframe width="100%" height="260" style="border: none" src="https://thingspeak.com/channels/3140279/charts/3?bgcolor=%23ffffff&color=%23d62020&dynamic=true&results=10&title=Insola%C3%A7%C3%A3o+x+Tempo&type=line&xaxis=Hora+H&yaxis=Insola%C3%A7%C3%A3o+%25"></iframe>
+              </div>
+            </div>
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <!-- Div 5: Cards de alerta de temperatura e chuva -->
+    <div id="div5-alertas">
+      <div class="alertas-grid">
+        <div class="alert-card" id="alerta">
+          <span class="icon">⚠️</span>
+          Alerta: 
+          <strong id="alerta-value">--</strong>
+        </div>
+        <div class="alert-card" id="chuva">
+          <span class="icon">🌧️</span>
+          Chuva: 
+          <strong id="chuva-value">--</strong>
+        </div>
+      </div>
+    </div>
+
+    <!-- Div 6: Footer -->
+    <div id="div6-footer">
+      <footer>
+        <small>
+          <p><b>Desenvolvido pela equipe Cangaceiros | Faculdade Nova Roma | ADS 2025 | Sistemas Embarcados</b></p>
+        </small>
+      </footer>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</body>
+</html>
